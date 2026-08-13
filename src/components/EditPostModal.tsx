@@ -14,7 +14,7 @@ import { VoiceRecorder } from './VoiceRecorder';
 
 interface EditPostModalProps {
   post: Post | null;
-  currentUser: User;
+  currentUser: User | null;
   isOpen: boolean;
   onClose: () => void;
   onSubmitEdit: (

@@ -4,11 +4,11 @@ import { Eye, Share2, MessageCircle, BarChart3, TrendingUp, Sparkles, Heart } fr
 
 interface PostStatsModalProps {
   post: Post;
-  isOpen: boolean;
+  isOpen?: boolean;
   onClose: () => void;
 }
 
-export const PostStatsModal: React.FC<PostStatsModalProps> = ({ post, isOpen, onClose }) => {
+export const PostStatsModal: React.FC<PostStatsModalProps> = ({ post, isOpen = true, onClose }) => {
   if (!isOpen) return null;
 
   // Calculate reaction breakdown

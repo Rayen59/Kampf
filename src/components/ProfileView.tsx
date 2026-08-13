@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 
 interface ProfileViewProps {
-  currentUser: User;
+  currentUser: User | null;
   onUpdateProfile: (updated: User) => void;
   posts: Post[];
   onReact: (postId: string, type: any) => void;
@@ -41,6 +41,18 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   onClearSearchHistory,
   onSelectSearchQuery,
 }) => {
+  if (!currentUser) {
+    return (
+      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 text-center text-white my-8 shadow-2xl">
+        <Sparkles className="w-12 h-12 text-red-500 mx-auto mb-3 animate-pulse" />
+        <h2 className="text-2xl font-black mb-2">Welcome to Mein Kampf Social</h2>
+        <p className="text-xs text-slate-400 mb-6 max-w-sm mx-auto">
+          Please sign in or create an account to view and customize your creator profile, track your posts, and view search history.
+        </p>
+      </div>
+    );
+  }
+
   const [isEditing, setIsEditing] = useState(false);
   const [displayName, setDisplayName] = useState(currentUser.displayName);
   const [bio, setBio] = useState(currentUser.bio || '');

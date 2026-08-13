@@ -13,11 +13,23 @@ import {
 } from 'lucide-react';
 
 interface AnalyticsViewProps {
-  currentUser: User;
+  currentUser: User | null;
   posts: Post[];
 }
 
 export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ currentUser, posts }) => {
+  if (!currentUser) {
+    return (
+      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 text-center text-white my-8 shadow-2xl">
+        <BarChart3 className="w-12 h-12 text-amber-400 mx-auto mb-3 animate-pulse" />
+        <h2 className="text-2xl font-black mb-2">Creator Analytics</h2>
+        <p className="text-xs text-slate-400 mb-4 max-w-sm mx-auto">
+          Sign in to view your post engagement, views, reactions, and creator performance statistics.
+        </p>
+      </div>
+    );
+  }
+
   const myPosts = posts.filter((p) => p.author.id === currentUser.id);
 
   const totalViews = myPosts.reduce((acc, p) => acc + p.stats.viewsCount, 0);

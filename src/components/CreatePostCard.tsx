@@ -3,24 +3,27 @@ import { User } from '../types';
 import { Image as ImageIcon, Video, Mic, FileText, Send } from 'lucide-react';
 
 interface CreatePostCardProps {
-  currentUser: User;
+  currentUser: User | null;
   onOpenModal: () => void;
 }
 
 export const CreatePostCard: React.FC<CreatePostCardProps> = ({ currentUser, onOpenModal }) => {
+  const avatar = currentUser?.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80';
+  const name = currentUser ? currentUser.displayName.split(' ')[0] : 'there';
+
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-3xl p-4 shadow-xl mb-6 text-white">
       <div className="flex items-center gap-3">
         <img
-          src={currentUser.avatarUrl}
-          alt={currentUser.displayName}
+          src={avatar}
+          alt={currentUser?.displayName || 'User'}
           className="w-10 h-10 rounded-full object-cover border-2 border-red-500 shrink-0"
         />
         <button
           onClick={onOpenModal}
           className="flex-1 bg-slate-800/80 hover:bg-slate-800 text-left px-4 py-3 rounded-full text-xs font-medium text-slate-400 border border-slate-700/60 transition-all hover:border-slate-600"
         >
-          What's on your mind, {currentUser.displayName.split(' ')[0]}? Share text, voice or media...
+          What's on your mind, {name}? Share text, voice or media...
         </button>
       </div>
 

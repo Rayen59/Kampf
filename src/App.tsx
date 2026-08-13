@@ -172,7 +172,11 @@ export default function App() {
   };
 
   const handleReact = (postId: string, type: ReactionType) => {
-    if (!currentUser) return;
+    if (!currentUser) {
+      setIsAuthOpen(true);
+      showToast('Please sign in or create an account to react to posts!');
+      return;
+    }
     const updated = toggleReaction(postId, currentUser.id, currentUser.displayName, type);
     setPosts(updated);
   };
@@ -183,7 +187,11 @@ export default function App() {
     parentCommentId?: string,
     audioAttachment?: AudioAttachment
   ) => {
-    if (!currentUser) return;
+    if (!currentUser) {
+      setIsAuthOpen(true);
+      showToast('Please sign in or create an account to comment!');
+      return;
+    }
     const updated = addComment(postId, currentUser, content, parentCommentId, audioAttachment);
     setPosts(updated);
     showToast('Comment added!');
@@ -300,7 +308,14 @@ export default function App() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onOpenAuth={() => setIsAuthOpen(true)}
-        onOpenCreatePost={() => setIsCreatePostOpen(true)}
+        onOpenCreatePost={() => {
+          if (!currentUser) {
+            setIsAuthOpen(true);
+            showToast('Please sign in or create an account to publish a post.');
+            return;
+          }
+          setIsCreatePostOpen(true);
+        }}
         searchQuery={searchQuery}
         setSearchQuery={handleSearchChange}
         onLogout={() => {
@@ -325,7 +340,14 @@ export default function App() {
             {/* Inline Composer Card */}
             <CreatePostCard
               currentUser={currentUser}
-              onOpenModal={() => setIsCreatePostOpen(true)}
+              onOpenModal={() => {
+                if (!currentUser) {
+                  setIsAuthOpen(true);
+                  showToast('Please sign in or create an account to publish a post.');
+                  return;
+                }
+                setIsCreatePostOpen(true);
+              }}
             />
 
             {/* Post of the Day Highlight Banner */}
@@ -550,7 +572,14 @@ export default function App() {
 
       {/* Floating Plus Button for Mobile */}
       <button
-        onClick={() => setIsCreatePostOpen(true)}
+        onClick={() => {
+          if (!currentUser) {
+            setIsAuthOpen(true);
+            showToast('Please sign in or create an account to publish a post.');
+            return;
+          }
+          setIsCreatePostOpen(true);
+        }}
         className="fixed bottom-6 right-6 sm:hidden w-14 h-14 bg-gradient-to-tr from-red-600 to-rose-500 text-white rounded-full flex items-center justify-center shadow-2xl shadow-red-600/50 z-40 hover:scale-110 active:scale-95 transition-transform"
       >
         <Plus className="w-7 h-7" />

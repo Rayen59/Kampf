@@ -28,7 +28,7 @@ import { getStoredUsers } from '../utils/storage';
 
 interface PostCardProps {
   post: Post;
-  currentUser: User;
+  currentUser: User | null;
   onReact: (postId: string, type: ReactionType) => void;
   onAddComment: (
     postId: string,
@@ -280,8 +280,8 @@ export const PostCard: React.FC<PostCardProps> = ({
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const isCreator = currentUser.id === post.author.id;
-  const userReaction = post.reactions.find((r) => r.userId === currentUser.id);
+  const isCreator = currentUser ? currentUser.id === post.author.id : false;
+  const userReaction = currentUser ? post.reactions.find((r) => r.userId === currentUser.id) : undefined;
 
   const toggleAudio = () => {
     if (!post.audioAttachment?.url) return;
@@ -693,8 +693,8 @@ export const PostCard: React.FC<PostCardProps> = ({
           {/* Add Comment Input */}
           <form onSubmit={handleCommentSubmit} className="flex gap-2 items-center">
             <img
-              src={currentUser.avatarUrl}
-              alt={currentUser.displayName}
+              src={currentUser?.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'}
+              alt={currentUser?.displayName || 'User'}
               className="w-8 h-8 rounded-full object-cover border border-red-500 shrink-0"
             />
             <input
@@ -749,11 +749,12 @@ export const PostCard: React.FC<PostCardProps> = ({
             ) : (
               parentComments.map((comment) => {
                 const replies = getReplies(comment.id);
-                const isCommentAuthor =
-                  currentUser.id === comment.author.id ||
-                  (currentUser.username && currentUser.username === comment.author.username) ||
-                  currentUser.id === post.author.id ||
-                  (currentUser.username && currentUser.username === post.author.username);
+                const isCommentAuthor = currentUser
+                  ? currentUser.id === comment.author.id ||
+                    (currentUser.username && currentUser.username === comment.author.username) ||
+                    currentUser.id === post.author.id ||
+                    (currentUser.username && currentUser.username === post.author.username)
+                  : false;
 
                 return (
                   <div key={comment.id} className="space-y-2">
@@ -803,11 +804,12 @@ export const PostCard: React.FC<PostCardProps> = ({
 
                     {/* Threaded Replies */}
                     {replies.map((reply) => {
-                      const isReplyAuthor =
-                        currentUser.id === reply.author.id ||
-                        (currentUser.username && currentUser.username === reply.author.username) ||
-                        currentUser.id === post.author.id ||
-                        (currentUser.username && currentUser.username === post.author.username);
+                      const isReplyAuthor = currentUser
+                        ? currentUser.id === reply.author.id ||
+                          (currentUser.username && currentUser.username === reply.author.username) ||
+                          currentUser.id === post.author.id ||
+                          (currentUser.username && currentUser.username === post.author.username)
+                        : false;
 
                       return (
                         <div key={reply.id} className="flex gap-2 text-xs pl-8">

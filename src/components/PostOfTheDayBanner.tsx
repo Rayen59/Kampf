@@ -5,7 +5,7 @@ import { ReactionPicker } from './ReactionPicker';
 
 interface PostOfTheDayProps {
   post: Post | null;
-  currentUser: User;
+  currentUser: User | null;
   onReact: (postId: string, type: ReactionType) => void;
   onViewComments: (postId: string) => void;
 }
@@ -20,7 +20,9 @@ export const PostOfTheDayBanner: React.FC<PostOfTheDayProps> = ({
 
   if (!post) return null;
 
-  const userReaction = post.reactions.find((r) => r.userId === currentUser.id);
+  const userReaction = currentUser
+    ? post.reactions.find((r) => r.userId === currentUser.id)
+    : null;
 
   return (
     <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-950/90 via-slate-900 to-red-950/90 border-2 border-amber-500/50 p-5 shadow-2xl my-4 text-white group">
