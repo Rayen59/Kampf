@@ -14,6 +14,8 @@ import {
   Search,
   Trash2,
   Clock,
+  UserX,
+  AlertTriangle,
 } from 'lucide-react';
 
 interface ProfileViewProps {
@@ -27,6 +29,7 @@ interface ProfileViewProps {
   onDeleteComment?: (postId: string, commentId: string) => void;
   onClearSearchHistory?: () => void;
   onSelectSearchQuery?: (query: string) => void;
+  onDeleteAccount?: () => void;
 }
 
 export const ProfileView: React.FC<ProfileViewProps> = ({
@@ -40,6 +43,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   onDeleteComment,
   onClearSearchHistory,
   onSelectSearchQuery,
+  onDeleteAccount,
 }) => {
   if (!currentUser) {
     return (
@@ -57,6 +61,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   const [displayName, setDisplayName] = useState(currentUser.displayName);
   const [bio, setBio] = useState(currentUser.bio || '');
   const [avatarUrl, setAvatarUrl] = useState(currentUser.avatarUrl);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const myPosts = posts.filter((p) => p.author.id === currentUser.id);
 
@@ -268,6 +273,65 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           ))
         )}
       </div>
+
+      {/* Account Danger Zone */}
+      <div className="bg-red-950/20 border border-red-900/40 rounded-3xl p-5 shadow-xl space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <UserX className="w-5 h-5 text-red-500" />
+            <div>
+              <h4 className="text-sm font-bold text-red-300">Delete Account / Supprimer le compte</h4>
+              <p className="text-[11px] text-slate-400">
+                Permanently delete your profile and account credentials. You will be logged out and cannot log back in with this account.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowDeleteModal(true)}
+            className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-2xl text-xs font-bold transition-all shadow-lg shadow-red-600/30 shrink-0"
+          >
+            Delete Account
+          </button>
+        </div>
+      </div>
+
+      {/* Delete Account Modal Confirmation */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fadeIn text-white">
+          <div className="bg-slate-900 border border-red-800/80 rounded-3xl p-6 text-center shadow-2xl max-w-sm w-full space-y-4">
+            <div className="w-14 h-14 rounded-full bg-red-950/80 border border-red-500/50 flex items-center justify-center mx-auto text-red-400">
+              <AlertTriangle className="w-7 h-7" />
+            </div>
+            <div>
+              <h3 className="text-lg font-black text-white mb-1">Delete Account Permanently?</h3>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Are you sure you want to delete <span className="font-bold text-red-400">@{currentUser.username}</span>? This action is irreversible. You will be logged out immediately and will not be able to log back in.
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  if (onDeleteAccount) onDeleteAccount();
+                }}
+                className="w-full py-3 bg-red-600 hover:bg-red-500 text-white rounded-2xl font-bold text-xs shadow-lg shadow-red-600/40 transition-all flex items-center justify-center gap-2"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>Yes, Permanently Delete My Account</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowDeleteModal(false)}
+                className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-2xl font-semibold text-xs transition-colors"
+              >
+                Cancel / Keep Account
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

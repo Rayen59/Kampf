@@ -4,6 +4,7 @@ import {
   getCurrentUser,
   setCurrentUser,
   logoutUser,
+  deleteAccount,
   getStoredPosts,
   createPost,
   editPost,
@@ -11,6 +12,7 @@ import {
   toggleReaction,
   addComment,
   deleteComment,
+  sharePostToFeed,
   incrementPostView,
   getPostOfTheDay,
   addSearchToHistory,
@@ -202,6 +204,26 @@ export default function App() {
     const updated = deleteComment(postId, commentId, currentUser.id);
     setPosts(updated);
     showToast('Comment deleted.');
+  };
+
+  const handleSharePost = (postId: string) => {
+    if (!currentUser) {
+      setIsAuthOpen(true);
+      showToast('Please sign in or create an account to share posts!');
+      return;
+    }
+    const updated = sharePostToFeed(postId, currentUser);
+    setPosts(updated);
+    showToast('Publication partagée dans le fil public avec tous les utilisateurs ! 🎉');
+  };
+
+  const handleDeleteAccount = () => {
+    if (!currentUser) return;
+    const userId = currentUser.id;
+    deleteAccount(userId);
+    setCurrentUserParams(null);
+    showToast('Votre compte a été supprimé définitivement.');
+    setActiveTab('feed');
   };
 
   const handleSearchChange = (q: string) => {
@@ -477,6 +499,7 @@ export default function App() {
                   onDeletePost={handleDeletePost}
                   onEditPost={handleOpenEditPost}
                   onDeleteComment={handleDeleteComment}
+                  onSharePost={handleSharePost}
                 />
               ))
             )}
@@ -511,6 +534,7 @@ export default function App() {
                 onDeletePost={handleDeletePost}
                 onEditPost={handleOpenEditPost}
                 onDeleteComment={handleDeleteComment}
+                onSharePost={handleSharePost}
               />
             )}
           </div>
@@ -540,6 +564,7 @@ export default function App() {
                   onDeletePost={handleDeletePost}
                   onEditPost={handleOpenEditPost}
                   onDeleteComment={handleDeleteComment}
+                  onSharePost={handleSharePost}
                 />
               ))}
           </div>
@@ -561,6 +586,7 @@ export default function App() {
             onDeleteComment={handleDeleteComment}
             onClearSearchHistory={handleClearSearchHistory}
             onSelectSearchQuery={handleSelectSearchQuery}
+            onDeleteAccount={handleDeleteAccount}
           />
         )}
 

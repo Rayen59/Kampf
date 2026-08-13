@@ -39,6 +39,7 @@ interface PostCardProps {
   onDeletePost: (postId: string) => void;
   onEditPost?: (post: Post) => void;
   onDeleteComment?: (postId: string, commentId: string) => void;
+  onSharePost?: (postId: string) => void;
 }
 
 const CommentAudioPlayer: React.FC<{ audio: AudioAttachment }> = ({ audio }) => {
@@ -250,6 +251,7 @@ export const PostCard: React.FC<PostCardProps> = ({
   onDeletePost,
   onEditPost,
   onDeleteComment,
+  onSharePost,
 }) => {
   const [showReactionPicker, setShowReactionPicker] = useState(false);
   const [showStatsModal, setShowStatsModal] = useState(false);
@@ -300,15 +302,19 @@ export const PostCard: React.FC<PostCardProps> = ({
   };
 
   const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: `Post by ${post.author.displayName}`,
-        text: post.content,
-        url: window.location.href,
-      }).catch(() => {});
+    if (onSharePost) {
+      onSharePost(post.id);
     } else {
-      navigator.clipboard.writeText(window.location.href);
-      alert('Post link copied to clipboard!');
+      if (navigator.share) {
+        navigator.share({
+          title: `Post by ${post.author.displayName}`,
+          text: post.content,
+          url: window.location.href,
+        }).catch(() => {});
+      } else {
+        navigator.clipboard.writeText(window.location.href);
+        alert('Post link copied to clipboard!');
+      }
     }
   };
 
@@ -345,6 +351,14 @@ export const PostCard: React.FC<PostCardProps> = ({
 
   return (
     <article className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl my-4 text-white relative transition-all hover:border-slate-700/80">
+      {/* Shared Post Banner */}
+      {post.sharedBy && (
+        <div className="flex items-center gap-2 mb-3 pb-2.5 border-b border-slate-800/80 text-xs text-red-400 font-bold bg-red-950/40 px-3 py-1.5 rounded-2xl border border-red-900/40">
+          <Share2 className="w-3.5 h-3.5 shrink-0 text-red-400 animate-pulse" />
+          <span>Partagé par {post.sharedBy.displayName} (@{post.sharedBy.username}) avec toute la communauté</span>
+        </div>
+      )}
+
       {/* Creator Analytics Modal */}
       <PostStatsModal
         post={post}

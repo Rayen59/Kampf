@@ -173,6 +173,23 @@ export const logoutUser = () => {
   localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
 };
 
+export const deleteAccount = (userId: string): boolean => {
+  try {
+    const users = getStoredUsers();
+    const updatedUsers = users.filter((u) => u.id !== userId);
+    localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(updatedUsers));
+
+    const currentUser = getCurrentUser();
+    if (currentUser && currentUser.id === userId) {
+      logoutUser();
+    }
+    return true;
+  } catch (e) {
+    console.error('Error deleting account:', e);
+    return false;
+  }
+};
+
 export const addSearchToHistory = (userId: string, query: string): User | null => {
   const clean = query.trim();
   if (!clean || clean.length < 2) return null;
@@ -600,4 +617,52 @@ export const getPostOfTheDay = (posts: Post[]): Post | null => {
     return scoreB - scoreA;
   });
   return sorted[0] || null;
+};
+
+export const sharePostToFeed = (postId: string, user: User): Post[] => {
+  const posts = getStoredPosts();
+  const originalPost = posts.find((p) => p.id === postId);
+  if (!originalPost) return posts;
+
+  // 1. Increment sharesCount on original post
+  const updatedPosts = posts.map((p) => {
+    if (p.id === postId) {
+      return {
+        ...p,
+        stats: {
+          ...p.stats,
+          sharesCount: p.stats.sharesCount + 1,
+        },
+      };
+    }
+    return p;
+  });
+
+  // 2. Create shared post item visible to ALL users in global feed
+  const newSharedPost: Post = {
+    id: `post_share_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+    author: originalPost.author,
+    sharedBy: user,
+    content: originalPost.content,
+    mediaType: originalPost.mediaType,
+    images: originalPost.images,
+    videoUrl: originalPost.videoUrl,
+    audioAttachment: originalPost.audioAttachment,
+    fileAttachment: originalPost.fileAttachment,
+    createdAt: new Date().toISOString(),
+    reactions: [],
+    comments: [],
+    stats: {
+      viewsCount: 1,
+      sharesCount: 0,
+      impressions: 1,
+      engagementRate: 0,
+      topReaction: 'heart',
+    },
+    tags: originalPost.tags ? Array.from(new Set(['shared', ...originalPost.tags])) : ['shared'],
+  };
+
+  const finalPosts = [newSharedPost, ...updatedPosts];
+  savePosts(finalPosts);
+  return finalPosts;
 };

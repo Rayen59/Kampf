@@ -73,6 +73,7 @@ export interface PostStats {
 export interface Post {
   id: string;
   author: User;
+  sharedBy?: User;
   content: string;
   mediaType: 'text' | 'image' | 'video' | 'audio' | 'file' | 'mixed';
   images?: string[];
