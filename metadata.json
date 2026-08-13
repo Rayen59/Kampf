@@ -1,0 +1,10 @@
+{
+  "name": "Mein Kampf",
+  "description": "A feature-packed social media platform with media sharing, voice posts, custom emoji reactions, creator analytics, and Post of the Day.",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
