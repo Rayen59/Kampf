@@ -6,6 +6,8 @@ import {
   logoutUser,
   deleteAccount,
   getStoredPosts,
+  fetchPostsFromServer,
+  fetchUsersFromServer,
   createPost,
   editPost,
   deletePost,
@@ -48,8 +50,14 @@ export default function App() {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Instant real-time live synchronization across tabs and users
+  // Instant real-time live synchronization across tabs, browsers, and devices
   useEffect(() => {
+    // Initial fetch from Express server
+    fetchPostsFromServer().then((data) => {
+      if (Array.isArray(data)) setPosts(data);
+    });
+    fetchUsersFromServer();
+
     // Initial view increments
     posts.slice(0, 3).forEach((p) => {
       incrementPostView(p.id);
@@ -81,16 +89,19 @@ export default function App() {
       }
     }
 
-    // Interval fallback to guarantee instant (<1s) post updates across screens
+    // Server Polling loop every 1.5s to ensure ALL PHONES & USERS see new posts & shares instantly
     const timer = setInterval(() => {
-      const latest = getStoredPosts();
-      setPosts((prev) => {
-        if (JSON.stringify(prev) !== JSON.stringify(latest)) {
-          return latest;
+      fetchPostsFromServer().then((latest) => {
+        if (Array.isArray(latest) && latest.length > 0) {
+          setPosts((prev) => {
+            if (JSON.stringify(prev) !== JSON.stringify(latest)) {
+              return latest;
+            }
+            return prev;
+          });
         }
-        return prev;
       });
-    }, 1000);
+    }, 1500);
 
     return () => {
       window.removeEventListener('mk_posts_updated', refreshPosts);
@@ -204,7 +215,7 @@ export default function App() {
 
   const handleDeleteComment = (postId: string, commentId: string) => {
     if (!currentUser) return;
-    const updated = deleteComment(postId, commentId, currentUser.id);
+    const updated = deleteComment(postId, commentId);
     setPosts(updated);
     showToast('Comment deleted.');
   };
