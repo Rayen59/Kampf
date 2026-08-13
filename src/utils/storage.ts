@@ -619,36 +619,40 @@ export const getPostOfTheDay = (posts: Post[]): Post | null => {
   return sorted[0] || null;
 };
 
-export const sharePostToFeed = (postId: string, user: User): Post[] => {
+export const sharePostToFeed = (postId: string, user: User, caption?: string): Post[] => {
   const posts = getStoredPosts();
-  const originalPost = posts.find((p) => p.id === postId);
-  if (!originalPost) return posts;
+  const targetPost = posts.find((p) => p.id === postId);
+  if (!targetPost) return posts;
 
-  // 1. Increment sharesCount on original post
+  // Root post if sharing a share
+  const rootOriginalPost = targetPost.originalPost || targetPost;
+
+  // 1. Increment sharesCount on target and root posts
   const updatedPosts = posts.map((p) => {
-    if (p.id === postId) {
+    if (p.id === postId || p.id === rootOriginalPost.id) {
       return {
         ...p,
         stats: {
           ...p.stats,
-          sharesCount: p.stats.sharesCount + 1,
+          sharesCount: (p.stats?.sharesCount || 0) + 1,
         },
       };
     }
     return p;
   });
 
-  // 2. Create shared post item visible to ALL users in global feed
+  // 2. Create Facebook-style shared post item visible to ALL users in global feed
   const newSharedPost: Post = {
     id: `post_share_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-    author: originalPost.author,
+    author: user, // The person sharing is the author of this share post
     sharedBy: user,
-    content: originalPost.content,
-    mediaType: originalPost.mediaType,
-    images: originalPost.images,
-    videoUrl: originalPost.videoUrl,
-    audioAttachment: originalPost.audioAttachment,
-    fileAttachment: originalPost.fileAttachment,
+    originalPost: rootOriginalPost,
+    content: caption?.trim() || '', // Optional caption added by user
+    mediaType: rootOriginalPost.mediaType,
+    images: rootOriginalPost.images,
+    videoUrl: rootOriginalPost.videoUrl,
+    audioAttachment: rootOriginalPost.audioAttachment,
+    fileAttachment: rootOriginalPost.fileAttachment,
     createdAt: new Date().toISOString(),
     reactions: [],
     comments: [],
@@ -659,7 +663,7 @@ export const sharePostToFeed = (postId: string, user: User): Post[] => {
       engagementRate: 0,
       topReaction: 'heart',
     },
-    tags: originalPost.tags ? Array.from(new Set(['shared', ...originalPost.tags])) : ['shared'],
+    tags: rootOriginalPost.tags ? Array.from(new Set(['shared', ...rootOriginalPost.tags])) : ['shared'],
   };
 
   const finalPosts = [newSharedPost, ...updatedPosts];

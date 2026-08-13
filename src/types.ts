@@ -74,6 +74,7 @@ export interface Post {
   id: string;
   author: User;
   sharedBy?: User;
+  originalPost?: Post;
   content: string;
   mediaType: 'text' | 'image' | 'video' | 'audio' | 'file' | 'mixed';
   images?: string[];

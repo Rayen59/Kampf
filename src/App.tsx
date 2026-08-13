@@ -28,6 +28,7 @@ import { AuthModal } from './components/AuthModal';
 import { ProfileView } from './components/ProfileView';
 import { ChatZoneView } from './components/ChatZoneView';
 import { AnalyticsView } from './components/AnalyticsView';
+import { ShareModal } from './components/ShareModal';
 import { Sparkles, Flame, Plus, Layers, Image as ImageIcon, Mic, FileText, Video, Shuffle, Globe, Clock, Radio } from 'lucide-react';
 
 export default function App() {
@@ -43,6 +44,8 @@ export default function App() {
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [isEditPostOpen, setIsEditPostOpen] = useState(false);
+  const [sharingPost, setSharingPost] = useState<Post | null>(null);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Instant real-time live synchronization across tabs and users
@@ -209,12 +212,21 @@ export default function App() {
   const handleSharePost = (postId: string) => {
     if (!currentUser) {
       setIsAuthOpen(true);
-      showToast('Please sign in or create an account to share posts!');
+      showToast('Veuillez vous connecter pour partager cette publication !');
       return;
     }
-    const updated = sharePostToFeed(postId, currentUser);
+    const target = posts.find((p) => p.id === postId);
+    if (target) {
+      setSharingPost(target);
+      setIsShareModalOpen(true);
+    }
+  };
+
+  const handleConfirmSharePost = (postId: string, caption?: string) => {
+    if (!currentUser) return;
+    const updated = sharePostToFeed(postId, currentUser, caption);
     setPosts(updated);
-    showToast('Publication partagée dans le fil public avec tous les utilisateurs ! 🎉');
+    showToast('Publication partagée instantanément sur le fil public ! 🎉');
   };
 
   const handleDeleteAccount = () => {
@@ -640,6 +652,18 @@ export default function App() {
           setCurrentUser(user);
           showToast(`Welcome, ${user.displayName}!`);
         }}
+      />
+
+      {/* Facebook Style Share Modal */}
+      <ShareModal
+        post={sharingPost}
+        currentUser={currentUser}
+        isOpen={isShareModalOpen}
+        onClose={() => {
+          setIsShareModalOpen(false);
+          setSharingPost(null);
+        }}
+        onConfirmShare={handleConfirmSharePost}
       />
     </div>
   );

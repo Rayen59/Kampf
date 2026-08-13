@@ -471,90 +471,149 @@ export const PostCard: React.FC<PostCardProps> = ({
         </p>
       )}
 
-      {/* Media Type: Image Gallery */}
-      {post.images && post.images.length > 0 && (
-        <div
-          className={`grid gap-2 mb-3 rounded-2xl overflow-hidden border border-slate-800 ${
-            post.images.length === 1 ? 'grid-cols-1' : 'grid-cols-2'
-          }`}
-        >
-          {post.images.map((img, idx) => (
+      {/* Embedded Original Post (Facebook Style) */}
+      {post.originalPost ? (
+        <div className="bg-slate-950 border border-slate-800/90 rounded-2xl p-4 my-3 text-left space-y-2 relative hover:border-slate-700 transition-colors">
+          <div className="flex items-center gap-2.5 mb-2">
             <img
-              key={idx}
-              src={img}
-              alt="Post attachment"
-              className="w-full h-auto max-h-96 object-cover hover:scale-102 transition-transform duration-300"
-              referrerPolicy="no-referrer"
+              src={post.originalPost.author.avatarUrl}
+              alt={post.originalPost.author.displayName}
+              className="w-9 h-9 rounded-full object-cover border border-slate-700 shrink-0"
             />
-          ))}
-        </div>
-      )}
-
-      {/* Media Type: Video */}
-      {post.videoUrl && (
-        <div className="mb-3 rounded-2xl overflow-hidden border border-slate-800 bg-black">
-          <video src={post.videoUrl} controls className="w-full max-h-96" />
-        </div>
-      )}
-
-      {/* Media Type: Voice Note Audio Player */}
-      {post.audioAttachment && (
-        <div className="mb-3 bg-gradient-to-r from-red-950/60 via-slate-800 to-slate-900 border border-red-800/50 p-3.5 rounded-2xl flex items-center justify-between gap-3 shadow-inner">
-          <button
-            onClick={toggleAudio}
-            className="w-10 h-10 rounded-full bg-red-600 hover:bg-red-500 text-white flex items-center justify-center shrink-0 shadow-lg shadow-red-600/30 transition-transform hover:scale-105"
-          >
-            {isPlayingAudio ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
-          </button>
-
-          <div className="flex-1 flex flex-col justify-center">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-bold text-rose-200 flex items-center gap-1">
-                <Volume2 className="w-3.5 h-3.5 text-red-400" /> Voice Recording
-              </span>
-              <span className="text-[10px] font-mono text-slate-400">
-                {post.audioAttachment.duration}s
-              </span>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <h4 className="text-xs font-bold text-white">{post.originalPost.author.displayName}</h4>
+                <span className="text-[10px] text-slate-400">@{post.originalPost.author.username}</span>
+              </div>
+              <p className="text-[10px] text-slate-500">{formatTimestamp(post.originalPost.createdAt)}</p>
             </div>
-            <div className="flex items-center gap-1 h-5">
-              {(
-                post.audioAttachment.waveform || [
-                  20, 40, 60, 80, 50, 90, 30, 70, 85, 45, 95, 65, 35, 75,
-                ]
-              ).map((h, i) => (
-                <div
-                  key={i}
-                  className={`flex-1 rounded-full transition-all ${
-                    isPlayingAudio ? 'bg-red-500 animate-pulse' : 'bg-slate-700'
-                  }`}
-                  style={{ height: `${h}%` }}
+          </div>
+
+          {post.originalPost.content && (
+            <p className="text-xs text-slate-200 font-normal leading-relaxed whitespace-pre-wrap">
+              {post.originalPost.content}
+            </p>
+          )}
+
+          {post.originalPost.images && post.originalPost.images.length > 0 && (
+            <div className={`grid gap-1.5 mt-2 rounded-xl overflow-hidden border border-slate-800 ${post.originalPost.images.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
+              {post.originalPost.images.map((img, idx) => (
+                <img key={idx} src={img} alt="Shared attachment" className="w-full h-auto max-h-72 object-cover" />
+              ))}
+            </div>
+          )}
+
+          {post.originalPost.videoUrl && (
+            <div className="mt-2 rounded-xl overflow-hidden border border-slate-800 bg-black">
+              <video src={post.originalPost.videoUrl} controls className="w-full max-h-72" />
+            </div>
+          )}
+
+          {post.originalPost.audioAttachment && (
+            <div className="mt-2 p-3 bg-slate-900 border border-slate-800 rounded-xl flex items-center gap-3 text-xs text-amber-300 font-semibold">
+              <Volume2 className="w-4 h-4 text-red-400 shrink-0" />
+              <span>Message vocal ({post.originalPost.audioAttachment.duration}s)</span>
+            </div>
+          )}
+
+          {post.originalPost.fileAttachment && (
+            <div className="mt-2 p-3 bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-between gap-3 text-xs text-sky-300 font-semibold">
+              <div className="flex items-center gap-2 truncate">
+                <FileText className="w-4 h-4 text-sky-400 shrink-0" />
+                <span className="truncate">{post.originalPost.fileAttachment.name}</span>
+              </div>
+              <span className="text-[10px] text-slate-400">{post.originalPost.fileAttachment.size}</span>
+            </div>
+          )}
+        </div>
+      ) : (
+        <>
+          {/* Media Type: Image Gallery */}
+          {post.images && post.images.length > 0 && (
+            <div
+              className={`grid gap-2 mb-3 rounded-2xl overflow-hidden border border-slate-800 ${
+                post.images.length === 1 ? 'grid-cols-1' : 'grid-cols-2'
+              }`}
+            >
+              {post.images.map((img, idx) => (
+                <img
+                  key={idx}
+                  src={img}
+                  alt="Post attachment"
+                  className="w-full h-auto max-h-96 object-cover hover:scale-102 transition-transform duration-300"
+                  referrerPolicy="no-referrer"
                 />
               ))}
             </div>
-          </div>
-        </div>
-      )}
+          )}
 
-      {/* Media Type: Document File Attachment */}
-      {post.fileAttachment && (
-        <div className="mb-3 bg-slate-800/80 border border-slate-700/80 p-3.5 rounded-2xl flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 truncate">
-            <div className="p-2.5 bg-purple-600/20 rounded-xl border border-purple-500/30 text-purple-400">
-              <FileText className="w-5 h-5" />
+          {/* Media Type: Video */}
+          {post.videoUrl && (
+            <div className="mb-3 rounded-2xl overflow-hidden border border-slate-800 bg-black">
+              <video src={post.videoUrl} controls className="w-full max-h-96" />
             </div>
-            <div className="truncate">
-              <p className="font-bold text-xs text-slate-200 truncate">{post.fileAttachment.name}</p>
-              <p className="text-[10px] text-slate-400">{post.fileAttachment.size}</p>
+          )}
+
+          {/* Media Type: Voice Note Audio Player */}
+          {post.audioAttachment && (
+            <div className="mb-3 bg-gradient-to-r from-red-950/60 via-slate-800 to-slate-900 border border-red-800/50 p-3.5 rounded-2xl flex items-center justify-between gap-3 shadow-inner">
+              <button
+                onClick={toggleAudio}
+                className="w-10 h-10 rounded-full bg-red-600 hover:bg-red-500 text-white flex items-center justify-center shrink-0 shadow-lg shadow-red-600/30 transition-transform hover:scale-105"
+              >
+                {isPlayingAudio ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
+              </button>
+
+              <div className="flex-1 flex flex-col justify-center">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-bold text-rose-200 flex items-center gap-1">
+                    <Volume2 className="w-3.5 h-3.5 text-red-400" /> Voice Recording
+                  </span>
+                  <span className="text-[10px] font-mono text-slate-400">
+                    {post.audioAttachment.duration}s
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 h-5">
+                  {(
+                    post.audioAttachment.waveform || [
+                      20, 40, 60, 80, 50, 90, 30, 70, 85, 45, 95, 65, 35, 75,
+                    ]
+                  ).map((h, i) => (
+                    <div
+                      key={i}
+                      className={`flex-1 rounded-full transition-all ${
+                        isPlayingAudio ? 'bg-red-500 animate-pulse' : 'bg-slate-700'
+                      }`}
+                      style={{ height: `${h}%` }}
+                    />
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
-          <a
-            href={post.fileAttachment.url}
-            download={post.fileAttachment.name}
-            className="flex items-center gap-1 px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-xs font-semibold shrink-0 transition-colors"
-          >
-            <Download className="w-3.5 h-3.5" /> Download
-          </a>
-        </div>
+          )}
+
+          {/* Media Type: Document File Attachment */}
+          {post.fileAttachment && (
+            <div className="mb-3 bg-slate-800/80 border border-slate-700/80 p-3.5 rounded-2xl flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 truncate">
+                <div className="p-2.5 bg-purple-600/20 rounded-xl border border-purple-500/30 text-purple-400">
+                  <FileText className="w-5 h-5" />
+                </div>
+                <div className="truncate">
+                  <p className="font-bold text-xs text-slate-200 truncate">{post.fileAttachment.name}</p>
+                  <p className="text-[10px] text-slate-400">{post.fileAttachment.size}</p>
+                </div>
+              </div>
+              <a
+                href={post.fileAttachment.url}
+                download={post.fileAttachment.name}
+                className="flex items-center gap-1 px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-xs font-semibold shrink-0 transition-colors"
+              >
+                <Download className="w-3.5 h-3.5" /> Download
+              </a>
+            </div>
+          )}
+        </>
       )}
 
       {/* Tags */}
